@@ -1,0 +1,844 @@
+:root {
+    --primary-color: #1a237e;
+    --secondary-color: #283593;
+    --background-color: #f0f2f5;
+    --card-background: linear-gradient(135deg, #1a237e, #283593);
+    --text-color: #333;
+    --card-text: #fff;
+    --section-bg: #ffffff;
+}
+
+[data-theme="dark"] {
+    --primary-color: #3f51b5;
+    --secondary-color: #5c6bc0;
+    --background-color: #1a1a1a;
+    --card-background: linear-gradient(135deg, #3f51b5, #5c6bc0);
+    --text-color: #fff;
+    --card-text: #fff;
+    --section-bg: #2d2d2d;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-color);
+    transition: background-color 0.3s ease;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: var(--card-background);
+    border: none;
+    color: var(--card-text);
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.05);
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+}
+
+/* Card Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+    padding: 25px;
+    margin-bottom: 35px;
+    background-color: var(--section-bg);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.card {
+    background: var(--card-background);
+    color: var(--card-text);
+    padding: 25px;
+    margin: 12px;
+    border-radius: 15px;
+    width: 280px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-5px) scale(1.02);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .graph {
+        padding: 10px;
+    }
+
+    .chatbot-ui {
+        width: 90%;
+        right: 5%;
+        left: 5%;
+    }
+
+    .table {
+        font-size: 14px;
+    }
+}
+
+/* Interactive Elements */
+.card-value {
+    font-size: 2rem;
+    transition: all 0.3s ease;
+}
+
+.card:hover .card-value {
+    transform: scale(1.1);
+}
+
+/* Graph Transitions */
+.graph {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.graph.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Data Update Animation */
+@keyframes updatePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.value-update {
+    animation: updatePulse 0.3s ease;
+}
+
+/* Section Content Grid */
+.section-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Dual Card Container */
+.dual-card-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* Equal width columns */
+    gap: 20px;
+    grid-column: 1 / -1; /* Span all columns */
+    margin: 0 auto; /* Center the container */
+    width: 100%;
+    max-width: 800px; /* Limit maximum width */
+}
+
+/* Sound Level Card */
+.sound-level-container {
+    grid-column: 1;
+    width: 100%;
+    min-height: 140px;
+}
+
+/* RGB Card Styles */
+.rgb-card {
+    grid-column: 2;
+    width: 100%;
+    min-height: 140px;
+}
+
+/* Card base styles */
+.card {
+    width: 100%;
+    min-height: 140px;
+    margin: 0;
+    padding: 25px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--card-background);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.2rem;
+    color: var(--card-text);
+    font-weight: 500;
+}
+
+.card p {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--card-text);
+}
+
+/* Motion Data Graphs */
+.graphs-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.graph {
+    background: var(--card-background);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    height: 300px;
+    width: 100%;
+    position: relative;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* GPS Data Table */
+.table-container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: var(--section-bg);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th {
+    background: var(--card-background);
+    color: white;
+    padding: 15px 20px;
+    font-weight: 500;
+    text-align: left;
+}
+
+.table td {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table tr:hover td {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Map Container */
+.map-container {
+    height: 400px;
+    margin: 20px auto;
+    max-width: 800px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Section Headers */
+.section h2 {
+    text-align: center;
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    margin: 0 0 30px 0;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.section h2:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--primary-color);
+    border-radius: 3px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .section-content {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+
+    .graphs-container {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+
+    .graph {
+        height: 200px;
+    }
+
+    .table-container {
+        margin: 15px;
+    }
+
+    .map-container {
+        height: 300px;
+        margin: 15px;
+    }
+
+    .dual-card-container {
+        grid-template-columns: 1fr;
+        max-width: 400px; /* Smaller max-width for mobile */
+    }
+
+    .sound-level-container,
+    .rgb-card {
+        grid-column: 1;
+    }
+}
+
+/* Enhanced AQI Card Styling */
+#aqi-card {
+    grid-column: span 3;
+    max-width: 100%;
+    padding: 30px;
+}
+
+#aqi-value-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.aqi-value-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+#aqi-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.aqi-scale-container {
+    width: 100%;
+    padding: 15px 0;
+    position: relative;
+}
+
+.aqi-color-bar {
+    width: 100%;
+    height: 12px;
+    background: linear-gradient(to right,
+        #00e400 0%,    /* Good */
+        #00e400 16.66%,
+        #ffff00 16.66%, /* Moderate */
+        #ffff00 33.33%,
+        #ff7e00 33.33%, /* Unhealthy for Sensitive Groups */
+        #ff7e00 50%,
+        #ff0000 50%,    /* Unhealthy */
+        #ff0000 66.66%,
+        #8f3f97 66.66%, /* Very Unhealthy */
+        #8f3f97 83.33%,
+        #7e0023 83.33%, /* Hazardous */
+        #7e0023 100%
+    );
+    border-radius: 6px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.aqi-indicator {
+    position: absolute;
+    width: 4px;
+    height: 24px;
+    background-color: #fff;
+    bottom: -6px;
+    transform: translateX(-50%);
+    transition: left 0.3s ease;
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.aqi-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--card-text);
+}
+
+.aqi-label {
+    font-size: 1.1rem;
+    margin-top: 10px;
+    color: var(--card-text);
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .section-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sound-level-container {
+        grid-column: 1 / -1;  /* Span full width on medium screens */
+        grid-row: auto;
+    }
+
+    #aqi-card {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-content {
+        grid-template-columns: 1fr;
+    }
+
+    .sound-level-container {
+        grid-column: 1;
+    }
+
+    #aqi-card {
+        grid-column: 1;
+    }
+
+    #aqi-value-container {
+        padding: 0 10px;
+    }
+}
+
+/* Add this style for the map */
+#map {
+    height: 400px;
+    width: 100%;
+    border-radius: 15px;
+}
+
+/* Improved Chatbot Styles */
+.chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 1000;
+    display: none;
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #1a237e, #283593);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.chat-messages {
+    height: 300px;
+    overflow-y: auto;
+    padding: 15px;
+    background: #f8f9fa;
+}
+
+.message {
+    margin-bottom: 15px;
+    max-width: 80%;
+}
+
+.message.user {
+    margin-left: auto;
+    background: #1a237e;
+    color: white;
+    border-radius: 15px 15px 0 15px;
+    padding: 10px 15px;
+}
+
+.message.bot {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px 15px 15px 0;
+    padding: 10px 15px;
+}
+
+.chat-input {
+    display: flex;
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #eee;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    margin-right: 10px;
+    outline: none;
+}
+
+.chat-input button {
+    background: #1a237e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.chat-input button:hover {
+    background: #283593;
+}
+
+.chat-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: #1a237e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+}
+
+.chat-toggle i {
+    color: white;
+    font-size: 24px;
+}
+
+/* Motion Data section styling */
+.motion-data {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.motion-graphs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.graph-container {
+    background: linear-gradient(145deg, #ffffff, #f6f7f9);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.05),
+        0 6px 6px rgba(0, 0, 0, 0.06);
+    height: 350px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.graph-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.08),
+        0 10px 10px rgba(0, 0, 0, 0.06);
+}
+
+.graph-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #FF6384, #36A2EB, #4BC0C0);
+    border-radius: 20px 20px 0 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.graph-container:hover::before {
+    opacity: 1;
+}
+
+.graph-label {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    position: relative;
+    padding-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.graph-label::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #FF6384, #36A2EB);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.graph-container:hover .graph-label::after {
+    width: 100px;
+}
+
+.graph-container canvas {
+    width: 100% !important;
+    height: calc(100% - 40px) !important;
+    transition: all 0.3s ease;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Apply animations with delays to each graph */
+.graph-container:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.graph-container:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.graph-container:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+/* Enhanced scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #FF6384, #36A2EB);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #FF6384, #4BC0C0);
+}
+
+/* RGB Card in Telemetry Section */
+.rgb-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.rgb-compact {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.rgb-preview-small {
+    flex-shrink: 0;
+}
+
+.color-box-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgb(0, 0, 0);
+    overflow: hidden;
+}
+
+.intensity-overlay-small {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: black;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.rgb-values-compact {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rgb-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.rgb-bars {
+    display: flex;
+    gap: 4px;
+    height: 4px;
+}
+
+.mini-bar {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.mini-fill {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+.mini-fill.red {
+    background-color: rgba(255, 0, 0, 0.7);
+}
+
+.mini-fill.green {
+    background-color: rgba(0, 255, 0, 0.7);
+}
+
+.mini-fill.blue {
+    background-color: rgba(0, 0, 255, 0.7);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .section-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dual-card-container {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-content {
+        grid-template-columns: 1fr;
+    }
+
+    .dual-card-container {
+        grid-template-columns: 1fr;
+        grid-column: 1;
+        gap: 15px;
+    }
+
+    .sound-level-container,
+    .rgb-card {
+        grid-column: 1;
+    }
+}

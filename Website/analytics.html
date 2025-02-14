@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Balloon Analytics</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="analytic.css">
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i> Toggle Theme
+    </button>
+
+<!-- Weather Balloon Telemetry Section -->
+<section class="section">
+    <h2>Weather Balloon Telemetry</h2>
+    <div class="section-content">
+        <div class="card">
+            <h3>Temperature</h3>
+            <p id="temperature">Loading...</p>
+        </div>
+        <div class="card">
+            <h3>Humidity</h3>
+            <p id="humidity">Loading...</p>
+        </div>
+        <div class="card">
+            <h3>Pressure</h3>
+            <p id="pressure">Loading...</p>
+        </div>
+        <div class="dual-card-container">
+            <div class="card sound-level-container">
+                <h3>Sound Level</h3>
+                <p id="sound">Loading...</p>
+            </div>
+            <div class="card rgb-card">
+                <h3>RGB Light</h3>
+                <div class="rgb-compact">
+                    <div class="rgb-preview-small">
+                        <div class="color-box-small">
+                            <div class="intensity-overlay-small"></div>
+                        </div>
+                    </div>
+                    <div class="rgb-values-compact">
+                        <div class="rgb-text">
+                            <span id="rgb-value">RGB(0, 0, 0)</span>
+                            <span id="intensity-value-small">0%</span>
+                        </div>
+                        <div class="rgb-bars">
+                            <div class="mini-bar">
+                                <div class="mini-fill red" id="red-bar-small"></div>
+                            </div>
+                            <div class="mini-bar">
+                                <div class="mini-fill green" id="green-bar-small"></div>
+                            </div>
+                            <div class="mini-bar">
+                                <div class="mini-fill blue" id="blue-bar-small"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card" id="aqi-card">
+            <h3>Air Quality Index (AQI)</h3>
+            <div id="aqi-value-container">
+                <div class="aqi-value-wrapper">
+                    <p id="aqi-value">Loading...</p>
+                </div>
+                <div class="aqi-scale-container">
+                    <div class="aqi-color-bar">
+                        <div class="aqi-indicator"></div>
+                    </div>
+                    <div class="aqi-labels">
+                        <span>Good</span>
+                        <span>Moderate</span>
+                        <span>USG</span>
+                        <span>Unhealthy</span>
+                        <span>Very Unhealthy</span>
+                        <span>Hazardous</span>
+                    </div>
+                </div>
+                <span class="aqi-label" id="aqi-label">Air Quality</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Motion Data Section -->
+<section class="section">
+    <h2>Motion Data</h2>
+    <div class="motion-data">
+        <div class="motion-graphs">
+            <div class="graph-container">
+                <div class="graph-label">Gyroscope Data</div>
+                <canvas id="gyroscopeGraph"></canvas>
+            </div>
+            <div class="graph-container">
+                <div class="graph-label">Accelerometer Data</div>
+                <canvas id="accelerometerGraph"></canvas>
+            </div>
+            <div class="graph-container">
+                <div class="graph-label">Magnetometer Data</div>
+                <canvas id="magnetometerGraph"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GPS Data Section -->
+<section class="section">
+    <h2>GPS Data</h2>
+    <div class="table-container">
+        <table class="table">
+            <tr>
+                <th>Latitude</th>
+                <td id="latitude">Loading...</td>
+            </tr>
+            <tr>
+                <th>Longitude</th>
+                <td id="longitude">Loading...</td>
+            </tr>
+            <tr>
+                <th>Altitude</th>
+                <td id="altitude">Loading...</td>
+            </tr>
+            <tr>
+                <th>Speed</th>
+                <td id="speed">Loading...</td>
+            </tr>
+            <tr>
+                <th>Satellites</th>
+                <td id="satellites">Loading...</td>
+            </tr>
+            <tr>
+                <th>Course (Degrees)</th>
+                <td id="course">Loading...</td>
+            </tr>
+            <tr>
+                <th>UTC Time</th>
+                <td id="utc-time">Loading...</td>
+            </tr>
+        </table>
+    </div>
+    <div class="map-container" id="map"></div>
+</section>
+
+
+
+    
+
+<!-- Add this HTML for the chatbot -->
+<div class="chat-toggle">
+    <i class="fas fa-comments"></i>
+</div>
+
+<div class="chat-widget">
+    <div class="chat-header">
+        <h3>Weather Balloon Assistant</h3>
+        <i class="fas fa-times" id="close-chat"></i>
+    </div>
+    <div class="chat-messages">
+        <div class="message bot">
+            Hello! I'm your Weather Balloon Assistant . How can I help you today?
+        </div>
+    </div>
+    <div class="chat-input">
+        <input type="text" placeholder="Type your message...">
+        <button>Send</button>
+    </div>
+</div>
+
+<script>
+    // Initialize charts with fixed data
+    function initCharts() {
+        // Sample data for all graphs
+        const labels = ['00:00', '00:01', '00:02', '00:03', '00:04', '00:05'];
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    font: {
+                        size: 16
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        };
+
+        // Ensure canvas elements exist before creating charts
+        const gyroCanvas = document.getElementById('gyroscopeGraph');
+        const accelCanvas = document.getElementById('accelerometerGraph');
+        const magCanvas = document.getElementById('magnetometerGraph');
+
+        if (gyroCanvas && accelCanvas && magCanvas) {
+            // Gyroscope Chart
+            new Chart(gyroCanvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'X-axis',
+                        data: [1, 2, 1.5, 2.5, 2, 3],
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.4
+                    }, {
+                        label: 'Y-axis',
+                        data: [2, 2.5, 2, 3, 2.5, 3.5],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.4
+                    }, {
+                        label: 'Z-axis',
+                        data: [1.5, 1, 2, 1.5, 2.5, 2],
+                        borderColor: 'rgb(54, 162, 235)',
+                        tension: 0.4
+                    }]
+                },
+                options: chartOptions
+            });
+
+            // Accelerometer Chart
+            new Chart(accelCanvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'X-axis',
+                        data: [0.5, 1, 0.8, 1.2, 0.9, 1.5],
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.4
+                    }, {
+                        label: 'Y-axis',
+                        data: [1, 1.5, 1.2, 1.8, 1.4, 2],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.4
+                    }, {
+                        label: 'Z-axis',
+                        data: [0.8, 0.6, 1, 0.7, 1.2, 0.9],
+                        borderColor: 'rgb(54, 162, 235)',
+                        tension: 0.4
+                    }]
+                },
+                options: chartOptions
+            });
+
+            // Magnetometer Chart
+            new Chart(magCanvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'X-axis',
+                        data: [20, 25, 22, 28, 24, 30],
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.4
+                    }, {
+                        label: 'Y-axis',
+                        data: [25, 30, 27, 32, 28, 35],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.4
+                    }, {
+                        label: 'Z-axis',
+                        data: [15, 20, 18, 22, 19, 25],
+                        borderColor: 'rgb(54, 162, 235)',
+                        tension: 0.4
+                    }]
+                },
+                options: chartOptions
+            });
+        }
+    }
+
+    // Initialize map with constant position
+    function initMap() {
+        map = L.map('map').setView([19.0760, 72.8777], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        marker = L.marker([19.0760, 72.8777]).addTo(map);
+    }
+
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize charts and map
+        initCharts();
+        initMap();
+        
+    
+    });
+
+    // Chatbot functionality
+    document.addEventListener('DOMContentLoaded', () => {
+        const API_KEY = 'AIzaSyCnIq0VFHPSRX8PaFpes_t1TwDNUFLfQcA'; // Replace with your actual API key
+        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+        
+        const chatToggle = document.querySelector('.chat-toggle');
+        const chatWidget = document.querySelector('.chat-widget');
+        const closeChat = document.getElementById('close-chat');
+        const chatInput = document.querySelector('.chat-input input');
+        const sendButton = document.querySelector('.chat-input button');
+        const chatMessages = document.querySelector('.chat-messages');
+
+        // Toggle chat visibility
+        chatToggle.addEventListener('click', () => {
+            chatWidget.style.display = 'block';
+            chatToggle.style.display = 'none';
+        });
+
+        closeChat.addEventListener('click', () => {
+            chatWidget.style.display = 'none';
+            chatToggle.style.display = 'flex';
+        });
+
+        // Function to get current sensor data
+        function getCurrentSensorData() {
+            return {
+                temperature: document.getElementById('temperature').textContent,
+                humidity: document.getElementById('humidity').textContent,
+                pressure: document.getElementById('pressure').textContent,
+                sound: document.getElementById('sound').textContent,
+                aqi: document.getElementById('aqi-value').textContent,
+                latitude: document.getElementById('latitude').textContent,
+                longitude: document.getElementById('longitude').textContent,
+                altitude: document.getElementById('altitude').textContent,
+                speed: document.getElementById('speed').textContent,
+                satellites: document.getElementById('satellites').textContent,
+                course: document.getElementById('course').textContent,
+                time: document.getElementById('utc-time').textContent
+            };
+        }
+
+        async function callGeminiAPI(userMessage) {
+            const sensorData = getCurrentSensorData();
+            
+            const payload = {
+                contents: [{
+                    parts: [{
+                        text: `You are a Weather Balloon Assistant. You should analyze the weather balloon data and provide smart insights.
+
+                        Current sensor data:
+                        ${JSON.stringify(sensorData, null, 2)}
+
+                        Guidelines for your responses:
+                        1. Answer questions directly related to the weather balloon data
+                        2. If values seem unusual or concerning, proactively mention it
+                        3. Suggest relevant follow-up questions or areas of interest based on the data
+                        4. For non-weather balloon questions, politely explain your limited scope
+                        5. If you notice any interesting patterns or correlations, mention them
+                        6. Provide safety suggestions if any readings are in dangerous ranges
+                        7. Keep responses concise and focused
+
+                        Reference ranges for alerts:
+                        - Temperature: Alert if outside -40°C to 50°C
+                        - Humidity: Alert if above 95%
+                        - Pressure: Alert if below 850 hPa (high altitude)
+                        - AQI: Alert if above 150
+                        - Sound: Alert if above 85 dB
+                        - Altitude changes: Note rapid changes
+                        - GPS: Note if satellite count drops below 4
+
+                        User question: ${userMessage}
+
+                        Please provide a focused response with relevant insights based on the current data.`
+                    }]
+                }]
+            };
+
+            try {
+                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                return 'I apologize, but I encountered an error processing your request. Please try again.';
+            }
+        }
+
+        // Add function to detect significant changes in sensor data
+        function detectSignificantChanges(newData, oldData) {
+            // Store previous readings for comparison
+            if (!window.previousReadings) {
+                window.previousReadings = newData;
+                return;
+            }
+
+            const significantChanges = [];
+            const thresholds = {
+                temperature: 5,  // 5°C change
+                humidity: 10,    // 10% change
+                pressure: 50,    // 50 hPa change
+                aqi: 20,        // 20 AQI points change
+                altitude: 100    // 100m change
+            };
+
+            // Compare current readings with previous ones
+            for (const [key, value] of Object.entries(newData)) {
+                const oldValue = window.previousReadings[key];
+                const numericValue = parseFloat(value);
+                const numericOldValue = parseFloat(oldValue);
+
+                if (!isNaN(numericValue) && !isNaN(numericOldValue)) {
+                    const change = Math.abs(numericValue - numericOldValue);
+                    if (change >= (thresholds[key] || 0)) {
+                        significantChanges.push({
+                            sensor: key,
+                            oldValue: oldValue,
+                            newValue: value,
+                            change: change
+                        });
+                    }
+                }
+            }
+
+            // Update previous readings
+            window.previousReadings = newData;
+            return significantChanges;
+        }
+
+        // Enhance sendMessage function to include proactive alerts
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message
+                chatMessages.innerHTML += `
+                    <div class="message user">${message}</div>
+                `;
+                chatInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Add loading indicator
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'message bot';
+                loadingDiv.innerHTML = 'Analyzing data...';
+                chatMessages.appendChild(loadingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Check for significant changes
+                const currentData = getCurrentSensorData();
+                const changes = detectSignificantChanges(currentData);
+                
+                // If there are significant changes, append them to the user's question
+                let enhancedMessage = message;
+                if (changes && changes.length > 0) {
+                    enhancedMessage += "\n\nNotable changes detected in: " + 
+                        changes.map(change => `${change.sensor} (${change.oldValue} → ${change.newValue})`).join(", ");
+                }
+
+                // Get response from Gemini
+                const response = await callGeminiAPI(enhancedMessage);
+
+                // Replace loading message with actual response
+                loadingDiv.innerHTML = response;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    });
+
+    // Initialize motion data charts
+    function initMotionCharts() {
+        const commonOptions = {
+            type: 'line',
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12,
+                                family: "'Segoe UI', system-ui, sans-serif"
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11,
+                                family: "'Segoe UI', system-ui, sans-serif"
+                            },
+                            padding: 10
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11,
+                                family: "'Segoe UI', system-ui, sans-serif"
+                            },
+                            padding: 10
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        tension: 0.4
+                    },
+                    point: {
+                        radius: 4,
+                        hitRadius: 10,
+                        hoverRadius: 6
+                    }
+                }
+            }
+        };
+
+        // Rest of your chart initialization code remains the same...
+    }
+    // Function to fetch data from the API
+async function fetchWeatherBalloonData() {
+    try {
+        const response = await fetch('https://balloon-6bd1e-default-rtdb.firebaseio.com/telemetry.json');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching weather balloon data:', error);
+        return null;
+    }
+}
+
+// Function to update all UI elements with new data
+function updateUIWithData(data) {
+    if (!data) return;
+
+    // Update Telemetry Section
+    document.getElementById('temperature').textContent = `${data.temperature.toFixed(1)}°C`;
+    document.getElementById('humidity').textContent = `${data.humidity.toFixed(1)}%`;
+    document.getElementById('pressure').textContent = `${data.pressure.toFixed(2)} hPa`;
+    document.getElementById('sound').textContent = `${data.decibel_level.toFixed(1)} dB`;
+    
+    // Update RGB Display
+    updateRGBDisplay(
+        data.light_r,
+        data.light_g,
+        data.light_b,
+        data.ambient_light
+    );
+    
+    // Update AQI
+    document.getElementById('aqi-value').textContent = data.aqi.toString();
+    updateAQIIndicator(data.aqi);
+    
+    // Update GPS Data
+    document.getElementById('latitude').textContent = data.gps_latitude.toFixed(5);
+    document.getElementById('longitude').textContent = data.gps_longitude.toFixed(5);
+    document.getElementById('altitude').textContent = `${data.gps_altitude.toFixed(1)} m`;
+    document.getElementById('speed').textContent = `${data.gps_speed.toFixed(1)} m/s`;
+    document.getElementById('satellites').textContent = data.gps_satellites.toString();
+    document.getElementById('utc-time').textContent = data.current_time;
+    
+    // Update map marker
+    updateMapMarker(data.gps_latitude, data.gps_longitude);
+
+    // Store motion data for charts
+    const motionData = {
+        gyroscope: {
+            x: [data.gyro_x],
+            y: [data.gyro_y],
+            z: [data.gyro_z]
+        },
+        accelerometer: {
+            x: [data.accel_x],
+            y: [data.accel_y],
+            z: [data.accel_z]
+        },
+        magnetometer: {
+            x: [data.mag_x],
+            y: [data.mag_y],
+            z: [data.mag_z]
+        }
+    };
+    
+    // Update Motion Data Charts
+    updateMotionCharts(motionData);
+}
+
+// Function to update motion charts with new data
+function updateMotionCharts(motionData) {
+    const charts = {
+        gyroscope: Chart.getChart('gyroscopeGraph'),
+        accelerometer: Chart.getChart('accelerometerGraph'),
+        magnetometer: Chart.getChart('magnetometerGraph')
+    };
+
+    // Update each chart with new data
+    Object.entries(charts).forEach(([sensorType, chart]) => {
+        if (chart && motionData[sensorType]) {
+            // Update datasets
+            chart.data.datasets.forEach((dataset, index) => {
+                const axis = ['x', 'y', 'z'][index];
+                // Remove oldest data point and add new one
+                dataset.data = dataset.data.slice(1).concat(motionData[sensorType][axis][0]);
+            });
+            
+            // Update timestamp labels
+            chart.data.labels = chart.data.labels.slice(1).concat(data.current_time);
+            
+            chart.update('none'); // Update without animation for real-time data
+        }
+    });
+}
+
+// Create data buffers for motion charts
+let motionBuffer = {
+    gyroscope: { x: [], y: [], z: [] },
+    accelerometer: { x: [], y: [], z: [] },
+    magnetometer: { x: [], y: [], z: [] }
+};
+
+// Initialize real-time updates
+function initializeRealTimeUpdates() {
+    // Initial data fetch
+    fetchWeatherBalloonData().then(data => {
+        if (data) {
+            updateUIWithData(data);
+        }
+    });
+
+    // Set up periodic updates
+    setInterval(async () => {
+        const data = await fetchWeatherBalloonData();
+        if (data) {
+            updateUIWithData(data);
+        }
+    }, 1000); // Update every second
+}
+
+// Add this to your existing DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+    // Your existing initialization code...
+    
+    // Initialize real-time updates
+    initializeRealTimeUpdates();
+});
+
+    // Initialize with intersection observer for scroll animations
+    document.addEventListener('DOMContentLoaded', () => {
+        initMotionCharts();
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.graph-container').forEach(graph => {
+            observer.observe(graph);
+            graph.style.animationPlayState = 'paused';
+        });
+    });
+
+    // Update the RGB display function to handle both displays
+    function updateRGBDisplay(red, green, blue, intensity) {
+        // Update main RGB display
+        // ... existing code for main RGB display ...
+
+        // Update compact RGB display in telemetry section
+        document.getElementById('red-bar-small').style.width = `${(red / 255) * 100}%`;
+        document.getElementById('green-bar-small').style.width = `${(green / 255) * 100}%`;
+        document.getElementById('blue-bar-small').style.width = `${(blue / 255) * 100}%`;
+        
+        // Calculate intensity-adjusted RGB values
+        const adjustedRed = Math.round((red * intensity) / 100);
+        const adjustedGreen = Math.round((green * intensity) / 100);
+        const adjustedBlue = Math.round((blue * intensity) / 100);
+        
+        // Update compact display values
+        document.getElementById('rgb-value').textContent = `RGB(${adjustedRed}, ${adjustedGreen}, ${adjustedBlue})`;
+        document.getElementById('intensity-value-small').textContent = `${intensity}%`;
+        
+        // Update compact color preview
+        const colorBoxSmall = document.querySelector('.color-box-small');
+        const intensityOverlaySmall = document.querySelector('.intensity-overlay-small');
+        
+        colorBoxSmall.style.backgroundColor = `rgb(${adjustedRed}, ${adjustedGreen}, ${adjustedBlue})`;
+        intensityOverlaySmall.style.opacity = (100 - intensity) / 100;
+    }
+
+    // Update map marker
+    function updateMapMarker(latitude, longitude) {
+        if (map && marker) {
+            marker.setLatLng([latitude, longitude]);
+            map.setView([latitude, longitude], 13);
+        }
+    }
+
+    // Function to update AQI indicator position
+    function updateAQIIndicator(aqi) {
+        const indicator = document.querySelector('.aqi-indicator');
+        const position = (aqi / 500) * 100;
+        indicator.style.left = `${Math.min(Math.max(position, 0), 100)}%`;
+        
+        // Update AQI label
+        const label = document.getElementById('aqi-label');
+        if (aqi <= 50) label.textContent = 'Good';
+        else if (aqi <= 100) label.textContent = 'Moderate';
+        else if (aqi <= 150) label.textContent = 'Unhealthy for Sensitive Groups';
+        else if (aqi <= 200) label.textContent = 'Unhealthy';
+        else if (aqi <= 300) label.textContent = 'Very Unhealthy';
+        else label.textContent = 'Hazardous';
+    }
+</script>
+
+</body>
+</html>
