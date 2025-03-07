@@ -313,10 +313,10 @@
 
     // Chatbot functionality
     document.addEventListener('DOMContentLoaded', () => {
-        const API_KEY = 'AIzaSyCnIq0VFHPSRX8PaFpes_t1TwDNUFLfQcA'; // Replace with your actual API key
-        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-        
-        const chatToggle = document.querySelector('.chat-toggle');
+        const API_KEY = 'AIzaSyCywbSoKGSUfjxbVka8xCiaTSzxeIR0MjI'; // Replace with your actual API key
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${API_KEY}`;
+
+        const chatToggle = document.querySelector('.chat-toggle');  
         const chatWidget = document.querySelector('.chat-widget');
         const closeChat = document.getElementById('close-chat');
         const chatInput = document.querySelector('.chat-input input');
@@ -389,23 +389,31 @@
             };
 
             try {
-                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                       
                     },
                     body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
-                    throw new Error('API request failed');
+                    const errorData = await response.json();
+                    console.error('API Error:', errorData);
+                    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
                 }
 
                 const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    throw new Error('Invalid response format from API');
+                }
+
                 return data.candidates[0].content.parts[0].text;
             } catch (error) {
                 console.error('Error calling Gemini API:', error);
-                return 'I apologize, but I encountered an error processing your request. Please try again.';
+                return `I apologize, but I encountered an error processing your request. Error details: ${error.message}. Please try again or contact support if the issue persists.`;
             }
         }
 
